@@ -14,6 +14,7 @@ public class Interpreter {
 	public static void main(String[] args) {
 		System.out.println("Type a program to evaluate and press the enter key,\n" + 
 							"e.g. ((lambda (av bv cv) (let ((a av) (b bv) (c cv) (d 279) (e 277)) (+ (* a b) (/ c (- d e))))) 3 100 84) \n" + 
+							"or try (letrec ((fact (lambda (n) (if (== n 0) 1 (* n (fact (- n 1))))))) (fact 5)) \n" +
 							"or try (letrec ((loop (lambda (x) (loop x)))) (loop 0)) \n" + 
 							"Press Ctrl + C to exit.");
 		Reader reader = new Reader();
