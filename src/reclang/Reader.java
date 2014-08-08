@@ -239,7 +239,7 @@ public class Reader {
 			expect(node,index++, ")");
 			AST.Exp body = node.getChild(index++).accept(this);
 			expect(node,index++, ")");
-			return new AST.LetExp(names,value_exps,body);
+			return new AST.LetrecExp(names,value_exps,body);
 		}
 
 		public AST.Exp visitErrorNode(ErrorNode node) {
