@@ -27,8 +27,10 @@ public class Reader {
 	private static final int 
 		program = 0, exp = 1, varexp = 2, numexp = 3,
 		addexp = 4, subexp = 5, multexp = 6, divexp = 7,
-		letexp = 8, lambdaexp = 9, callexp = 10,
-		letrecexp = 11 // New expression for this language.
+		letexp = 8, 
+		lambdaexp = 9, callexp = 10, // New expressions for the funclang language.
+		ifexp = 11, lessexp = 12, equalexp = 13, greaterexp = 14, // Other expressions for convenience.
+		letrecexp = 15 // New expression for the letrec language.
 		;
 
 	private static final boolean DEBUG = false;
@@ -144,6 +146,10 @@ public class Reader {
 				case letexp: return convertLetExp(node);
 				case lambdaexp: return convertLambdaExp(node);
 				case callexp: return convertCallExp(node);
+				case ifexp: return convertIfExp(node);
+				case lessexp: return convertLessExp(node);
+				case equalexp: return convertEqualExp(node);
+				case greaterexp: return convertGreaterExp(node);
 				case letrecexp: return convertLetrecExp(node);
 				case program: 
 				default: 
@@ -203,24 +209,52 @@ public class Reader {
 			expect(node,index++, ")");
 			return new AST.CallExp(operator, operands);
 		}
-
-		public AST.Exp visitTerminal(TerminalNode node) {
-			String s = node.toStringTree(parser);
-			if (isConcreteSyntaxToken(s))
-				return null;
-
-			try {
-				int v = Integer.parseInt(s);
-				return new AST.Const(v);
-			} catch (NumberFormatException e) {
-			}
-			// Error case - generally means a new Token is added in the grammar
-			// and not handled in
-			// the filterTokens method above, or a new value type is added.
-			System.out.println("visitTerminal: Illegal terminal " + s);
-			return new AST.ErrorExp();
+		
+		/**
+		 *  Syntax: ( if conditional_exp then_exp else_exp )
+		 */
+		private AST.Exp convertIfExp(RuleNode node){
+			int index = expect(node,0,"(", "if");
+			AST.Exp conditional = node.getChild(index++).accept(this);
+			AST.Exp then_exp = node.getChild(index++).accept(this);
+			AST.Exp else_exp = node.getChild(index++).accept(this);
+			expect(node,index++, ")");
+			return new AST.IfExp(conditional, then_exp, else_exp);
+		}
+		
+		/**
+		 *  Syntax: ( < first_exp second_exp )
+		 */
+		private AST.Exp convertLessExp(RuleNode node){
+			int index = expect(node,0,"(","<");
+			AST.Exp first_exp = node.getChild(index++).accept(this);
+			AST.Exp second_exp = node.getChild(index++).accept(this);
+			expect(node,index++, ")");
+			return new AST.LessExp(first_exp, second_exp);
+		}
+		
+		/**
+		 *  Syntax: ( == first_exp second_exp )
+		 */
+		private AST.Exp convertEqualExp(RuleNode node){
+			int index = expect(node,0,"(","==");
+			AST.Exp first_exp = node.getChild(index++).accept(this);
+			AST.Exp second_exp = node.getChild(index++).accept(this);
+			expect(node,index++, ")");
+			return new AST.EqualExp(first_exp, second_exp);
 		}
 
+		/**
+		 *  Syntax: ( > first_exp second_exp )
+		 */
+		private AST.Exp convertGreaterExp(RuleNode node){
+			int index = expect(node,0,"(",">");
+			AST.Exp first_exp = node.getChild(index++).accept(this);
+			AST.Exp second_exp = node.getChild(index++).accept(this);
+			expect(node,index++, ")");
+			return new AST.GreaterExp(first_exp, second_exp);
+		}
+		
 		/**
 		 *  Syntax: (letrec ((name value_exp)* ) body_exp)
 		 */  
@@ -240,6 +274,24 @@ public class Reader {
 			AST.Exp body = node.getChild(index++).accept(this);
 			expect(node,index++, ")");
 			return new AST.LetrecExp(names,value_exps,body);
+		}
+
+
+		public AST.Exp visitTerminal(TerminalNode node) {
+			String s = node.toStringTree(parser);
+			if (isConcreteSyntaxToken(s))
+				return null;
+
+			try {
+				int v = Integer.parseInt(s);
+				return new AST.Const(v);
+			} catch (NumberFormatException e) {
+			}
+			// Error case - generally means a new Token is added in the grammar
+			// and not handled in
+			// the filterTokens method above, or a new value type is added.
+			System.out.println("visitTerminal: Illegal terminal " + s);
+			return new AST.ErrorExp();
 		}
 
 		public AST.Exp visitErrorNode(ErrorNode node) {
