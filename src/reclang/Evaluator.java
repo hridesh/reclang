@@ -16,6 +16,7 @@ import reclang.AST.VarExp;
 import reclang.AST.Visitor;
 import reclang.Env.EmptyEnv;
 import reclang.Env.ExtendEnv;
+import reclang.Env.ExtendEnvRec;
 
 public class Evaluator implements Visitor<Value> {
 	Printer.ExpToStringConverter ts = new Printer.ExpToStringConverter();
@@ -135,11 +136,8 @@ public class Evaluator implements Visitor<Value> {
 		
 		for(Exp exp : fun_exps) 
 			funs.add((Value.Fun)exp.accept(this, env));
-		
-		Env new_env = env;
-		for (int index = 0; index < names.size(); index++)
-			new_env = new ExtendEnv(new_env, names.get(index), funs.get(index));
 
+		Env new_env = new ExtendEnvRec(env, names, funs);
 		return (Value) e.body().accept(this, new_env);		
 	}	
 
