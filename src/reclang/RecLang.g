@@ -130,7 +130,7 @@ grammar RecLang;
  Lambda : 'lambda' ;
  If : 'if' ; 
  Less : '<' ;
- Equal : '==' ;
+ Equal : '=' ;
  Greater : '>' ;
  Letrec : 'letrec' ;
  
