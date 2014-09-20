@@ -3,6 +3,9 @@ package reclang;
 import java.util.ArrayList;
 import java.util.List;
 
+import reclang.Env;
+
+
 /**
  * This class hierarchy represents expressions in the abstract syntax tree
  * manipulated by this interpreter.
@@ -16,14 +19,20 @@ public interface AST {
 		public abstract Object accept(Visitor visitor, Env env);
 	}
 	public static class Program extends ASTNode {
+		List<DefineDecl> _decls;
 		Exp _e;
 
-		public Program(Exp e) {
+		public Program(List<DefineDecl>decls, Exp e) {
+			_decls = decls;
 			_e = e;
 		}
 
 		public Exp e() {
 			return _e;
+		}
+		
+		public List<DefineDecl> decls() {
+			return _decls;
 		}
 		
 		public Object accept(Visitor visitor, Env env) {
@@ -50,14 +59,56 @@ public interface AST {
 		}
 	}
 
-	public static class Const extends Exp {
-		int _val;
+	public static class Unit extends Exp {
+		
+		public Unit() {}
 
-		public Const(int v) {
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+
+	}
+
+	public static class Const extends Exp {
+		double _val;
+
+		public Const(double v) {
 			_val = v;
 		}
 
-		public int v() {
+		public double v() {
+			return _val;
+		}
+		
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	public static class StrConst extends Exp {
+		String _val;
+
+		public StrConst(String v) {
+			_val = v;
+		}
+
+		public String v() {
+			return _val;
+		}
+		
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	public static class BoolConst extends Exp {
+		boolean _val;
+
+		public BoolConst(boolean v) {
+			_val = v;
+		}
+
+		public boolean v() {
 			return _val;
 		}
 		
@@ -235,18 +286,18 @@ public interface AST {
 	}
 	
 	/**
-	 * A define expression has the syntax 
+	 * A define declaration has the syntax 
 	 * 
 	 *  (define name expression)
 	 *  
 	 * @author hridesh
 	 *
 	 */
-	public static class DefineExp extends Exp {
-		private String _name;
-		private Exp _value_exp; 
+	public static class DefineDecl extends Exp {
+		String _name;
+		Exp _value_exp; 
 		
-		public DefineExp(String name, Exp value_exp) {
+		public DefineDecl(String name, Exp value_exp) {
 			_name = name;
 			_value_exp = value_exp;
 		}
@@ -403,6 +454,136 @@ public interface AST {
 	}
 
 	/**
+	 * A car expression has the syntax
+	 * 
+	 * ( car expression )
+	 * 
+	 * @author hridesh
+	 *
+	 */
+	public static class CarExp extends Exp {
+		private Exp _arg; 
+		public CarExp(Exp arg){
+			_arg = arg;
+		}
+		public Exp arg() { return _arg; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+	
+	/**
+	 * A cdr expression has the syntax
+	 * 
+	 * ( car expression )
+	 * 
+	 * @author hridesh
+	 *
+	 */
+	public static class CdrExp extends Exp {
+		private Exp _arg; 
+		public CdrExp(Exp arg){
+			_arg = arg;
+		}
+		public Exp arg() { return _arg; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+	
+	/**
+	 * A cons expression has the syntax
+	 * 
+	 * ( cons expression expression )
+	 * 
+	 * @author hridesh
+	 *
+	 */
+	public static class ConsExp extends Exp {
+		private Exp _fst; 
+		private Exp _snd; 
+		public ConsExp(Exp fst, Exp snd){
+			_fst = fst;
+			_snd = snd;
+		}
+		public Exp fst() { return _fst; }
+		public Exp snd() { return _snd; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	/**
+	 * A list expression has the syntax
+	 * 
+	 * ( list expression* )
+	 * 
+	 * @author hridesh
+	 *
+	 */
+	public static class ListExp extends Exp {
+		private List<Exp> _elems; 
+		public ListExp(List<Exp> elems){
+			_elems = elems;
+		}
+		public List<Exp> elems() { return _elems; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+	
+	/**
+	 * A null expression has the syntax
+	 * 
+	 * ( null? expression )
+	 * 
+	 * @author hridesh
+	 *
+	 */
+	public static class NullExp extends Exp {
+		private Exp _arg; 
+		public NullExp(Exp arg){
+			_arg = arg;
+		}
+		public Exp arg() { return _arg; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	/**
+	 * Eval expression: evaluate the program that is _val
+	 * @author hridesh
+	 *
+	 */
+	public static class EvalExp extends Exp {
+		private Exp _code; 
+		public EvalExp(Exp code){
+			_code = code;
+		}
+		public Exp code() { return _code; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	/**
+	 * Read expression: reads the file that is _file
+	 * @author hridesh
+	 *
+	 */
+	public static class ReadExp extends Exp {
+		private Exp _file; 
+		public ReadExp(Exp file){
+			_file = file;
+		}
+		public Exp file() { return _file; }
+		public Object accept(Visitor visitor, Env env) {
+			return visitor.visit(this, env);
+		}
+	}
+
+	/**
 	 * A letrec expression has the syntax 
 	 * 
 	 *  (letrec ((name expression)* ) expression)
@@ -442,7 +623,10 @@ public interface AST {
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
 		public T visit(AST.AddExp e, Env env);
+		public T visit(AST.Unit e, Env env);
 		public T visit(AST.Const e, Env env);
+		public T visit(AST.StrConst e, Env env);
+		public T visit(AST.BoolConst e, Env env);
 		public T visit(AST.DivExp e, Env env);
 		public T visit(AST.ErrorExp e, Env env);
 		public T visit(AST.MultExp e, Env env);
@@ -450,13 +634,20 @@ public interface AST {
 		public T visit(AST.SubExp e, Env env);
 		public T visit(AST.VarExp e, Env env);
 		public T visit(AST.LetExp e, Env env); // New for the varlang
-		public T visit(AST.DefineExp e, Env env); // New for the definelang
+		public T visit(AST.DefineDecl d, Env env); // New for the definelang
+		public T visit(AST.ReadExp e, Env env); // New for the funclang
+		public T visit(AST.EvalExp e, Env env); // New for the funclang
 		public T visit(AST.LambdaExp e, Env env); // New for the funclang
 		public T visit(AST.CallExp e, Env env); // New for the funclang
+		public T visit(AST.LetrecExp e, Env env); // New for the funclang
 		public T visit(AST.IfExp e, Env env); // Additional expressions for convenience
 		public T visit(AST.LessExp e, Env env); // Additional expressions for convenience
 		public T visit(AST.EqualExp e, Env env); // Additional expressions for convenience
 		public T visit(AST.GreaterExp e, Env env); // Additional expressions for convenience
-		public T visit(AST.LetrecExp e, Env env); // New for the reclang
+		public T visit(AST.CarExp e, Env env); // Additional expressions for convenience
+		public T visit(AST.CdrExp e, Env env); // Additional expressions for convenience
+		public T visit(AST.ConsExp e, Env env); // Additional expressions for convenience
+		public T visit(AST.ListExp e, Env env); // Additional expressions for convenience
+		public T visit(AST.NullExp e, Env env); // Additional expressions for convenience
 	}	
 }

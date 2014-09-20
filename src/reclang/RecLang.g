@@ -3,24 +3,37 @@ grammar RecLang;
  // Grammar of this Programming Language
  //  - grammar rules start with lowercase
  program : 
-		exp
+		(definedecl)* (exp)? //Zero or more define declarations followed by an optional expression.
 		;
+
+ definedecl  :               //New for definelang 
+ 		'(' Define 
+ 			Identifier
+ 			exp
+ 			')' 
+ 		;
 
  exp : 
 		varexp 
 		| numexp 
+		| strconst
+		| boolconst
         | addexp 
         | subexp 
         | multexp 
         | divexp
         | letexp
-        | defineexp //New for definelang
-        | lambdaexp //New for funclang
-        | callexp //New for funclang
-        | ifexp //New for funclang
-        | lessexp //New for funclang
-        | equalexp //New for funclang
-        | greaterexp //New for funclang
+        | lambdaexp //New for reclang
+        | callexp //New for reclang
+        | ifexp //New for reclang
+        | lessexp //New for reclang
+        | equalexp //New for reclang
+        | greaterexp //New for reclang
+        | carexp //New for reclang
+        | cdrexp //New for reclang
+        | consexp //New for reclang
+        | listexp //New for reclang
+        | nullexp //New for reclang
         | letrecexp //New for reclang
         ;
  
@@ -29,7 +42,17 @@ grammar RecLang;
  		;
  
  numexp :
- 		Number 
+ 		Number
+ 		| Number Dot Number
+ 		;
+
+ strconst :
+ 		StrLiteral
+ 		;
+
+ boolconst :
+ 		TrueLiteral
+ 		| FalseLiteral
  		;
   
  addexp :
@@ -42,7 +65,7 @@ grammar RecLang;
  subexp :  
  		'(' '-' 
  		    exp 
- 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 
@@ -56,7 +79,7 @@ grammar RecLang;
  divexp  : 
  		'(' '/' 
  		    exp 
- 		    exp 
+ 		    (exp)+ 
  		    ')' 
  		;
 
@@ -67,23 +90,16 @@ grammar RecLang;
  			')' 
  		;
 
- defineexp  :
- 		'(' Define 
- 			Identifier
- 			exp
- 			')' 
- 		;
-
  lambdaexp :
  		'(' Lambda 
- 			'(' Identifier+ ')'
+ 			'(' Identifier* ')'
  			exp 
  			')' 
  		;
 
  callexp :
  		'(' exp 
- 			exp+ 
+ 			exp* 
  			')' 
  		;
 
@@ -116,6 +132,37 @@ grammar RecLang;
  			')' 
  		;
 
+ carexp :
+ 		'(' Car 
+ 		    exp 
+ 			')' 
+ 		;
+
+ cdrexp :
+ 		'(' Cdr 
+ 		    exp 
+ 			')' 
+ 		;
+
+ consexp :
+ 		'(' Cons 
+ 		    exp 
+ 			exp 
+ 			')' 
+ 		;
+
+ listexp :
+ 		'(' List 
+ 		    exp* 
+ 			')' 
+ 		;
+
+ nullexp :
+ 		'(' Null 
+ 		    exp 
+ 			')' 
+ 		;
+
  letrecexp  :
  		'(' Letrec 
  			'(' ( '(' Identifier exp ')' )+  ')'
@@ -129,20 +176,26 @@ grammar RecLang;
  Define : 'define' ;
  Lambda : 'lambda' ;
  If : 'if' ; 
+ Car : 'car' ; 
+ Cdr : 'cdr' ; 
+ Cons : 'cons' ; 
+ List : 'list' ; 
+ Null : 'null?' ; 
+ Letrec : 'letrec' ;
  Less : '<' ;
  Equal : '=' ;
  Greater : '>' ;
- Letrec : 'letrec' ;
+ TrueLiteral : '#t' ;
+ FalseLiteral : '#f' ;
+ Dot : '.' ;
  
  // Lexical Specification of this Programming Language
  //  - lexical specification rules start with uppercase
 
  Identifier :   Letter LetterOrDigit*;
  	
- Number : 
-	DIGIT 
-	| (DIGIT_NOT_ZERO DIGIT+); 
-
+ Number : DIGIT+ ;
+ 
 // Identifier :   Letter LetterOrDigit*;
 
  Letter :   [a-zA-Z$_]
@@ -151,7 +204,7 @@ grammar RecLang;
 	|   [\uD800-\uDBFF] [\uDC00-\uDFFF] 
 		{Character.isJavaIdentifierStart(Character.toCodePoint((char)_input.LA(-2), (char)_input.LA(-1)))}? ;
 
- LetterOrDigit: [a-zA-Z0-9$_]
+ LetterOrDigit: [a-zA-Z0-9$_?]
 	|   ~[\u0000-\u00FF\uD800-\uDBFF] 
 		{Character.isJavaIdentifierPart(_input.LA(-1))}?
 	|    [\uD800-\uDBFF] [\uDC00-\uDFFF] 
@@ -159,6 +212,9 @@ grammar RecLang;
 
  fragment DIGIT: ('0'..'9');
  fragment DIGIT_NOT_ZERO: ('1'..'9');
+
+ fragment ESCQUOTE : '\\"';
+ StrLiteral :   '"' ( ESCQUOTE | ~('\n'|'\r') )*? '"';
 
  AT : '@';
  ELLIPSIS : '...';
