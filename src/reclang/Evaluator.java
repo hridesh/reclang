@@ -166,10 +166,13 @@ public class Evaluator implements Visitor<Value> {
 	 * @return
 	 */
 	private Env appendEnv(Env fst, Env snd){
-		if(fst.isEmpty())
-			return snd;
-		ExtendEnv f = (ExtendEnv) fst;
-		return new ExtendEnv(appendEnv(f.saved_env(),snd), f.var(), f.val());
+		if(fst.isEmpty()) return snd;
+		if(fst instanceof ExtendEnv) {
+			ExtendEnv f = (ExtendEnv) fst;
+			return new ExtendEnv(appendEnv(f.saved_env(),snd), f.var(), f.val());
+		}
+		ExtendEnvRec f = (ExtendEnvRec) fst;
+		return new ExtendEnvRec(appendEnv(f.saved_env(),snd), f.names(), f.vals());
 	}
 	/* End: helper for CallExp */
 	

@@ -51,6 +51,9 @@ public interface Env {
 		private Env _saved_env;
 		private List<String> _names;
 		private List<Value.FunVal> _funs;
+		public Env saved_env() { return _saved_env; }
+		public List<String> names() { return _names; }
+		public List<FunVal> vals() { return _funs; }
 		public ExtendEnvRec(Env saved_env, List<String> names, List<Value.FunVal> funs){
 			_saved_env = saved_env;
 			_names = names;
