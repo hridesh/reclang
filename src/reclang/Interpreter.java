@@ -1,7 +1,9 @@
 package reclang;
 import java.io.IOException;
 
-import reclang.AST.*;
+import reclang.Env;
+import reclang.Value;
+import reclang.AST.Program;
 
 /**
  * This main class implements the Read-Eval-Print-Loop of the interpreter with
@@ -20,18 +22,20 @@ public class Interpreter {
 		Reader reader = new Reader();
 		Evaluator eval = new Evaluator(reader);
 		Printer printer = new Printer();
-		try {
-			while (true) { // Read-Eval-Print-Loop (also known as REPL)
-				Program p = reader.read();
-				try {
-					Value val = eval.valueOf(p);
-					printer.print(val);
-				} catch (Env.LookupException e) {
-					printer.print(e);
-				}
+		REPL: while (true) { // Read-Eval-Print-Loop (also known as REPL)
+			Program p = null;
+			try {
+				p = reader.read();
+				if(p._e == null) continue REPL;
+				Value val = eval.valueOf(p);
+				printer.print(val);
+			} catch (Env.LookupException e) {
+				printer.print(e);
+			} catch (IOException e) {
+				System.out.println("Error reading input:" + e.getMessage());
+			} catch (NullPointerException e) {
+				System.out.println("Error:" + e.getMessage());
 			}
-		} catch (IOException e) {
-			System.out.println("Error reading input.");
 		}
 	}
 }
