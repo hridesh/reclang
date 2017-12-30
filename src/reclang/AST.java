@@ -59,9 +59,9 @@ public interface AST {
 		}
 	}
 
-	public static class Unit extends Exp {
+	public static class UnitExp extends Exp {
 		
-		public Unit() {}
+		public UnitExp() {}
 
 		public Object accept(Visitor visitor, Env env) {
 			return visitor.visit(this, env);
@@ -69,10 +69,10 @@ public interface AST {
 
 	}
 
-	public static class Const extends Exp {
+	public static class NumExp extends Exp {
 		double _val;
 
-		public Const(double v) {
+		public NumExp(double v) {
 			_val = v;
 		}
 
@@ -85,10 +85,10 @@ public interface AST {
 		}
 	}
 
-	public static class StrConst extends Exp {
+	public static class StrExp extends Exp {
 		String _val;
 
-		public StrConst(String v) {
+		public StrExp(String v) {
 			_val = v;
 		}
 
@@ -101,10 +101,10 @@ public interface AST {
 		}
 	}
 
-	public static class BoolConst extends Exp {
+	public static class BoolExp extends Exp {
 		boolean _val;
 
-		public BoolConst(boolean v) {
+		public BoolExp(boolean v) {
 			_val = v;
 		}
 
@@ -623,10 +623,10 @@ public interface AST {
 	public interface Visitor <T> {
 		// This interface should contain a signature for each concrete AST node.
 		public T visit(AST.AddExp e, Env env);
-		public T visit(AST.Unit e, Env env);
-		public T visit(AST.Const e, Env env);
-		public T visit(AST.StrConst e, Env env);
-		public T visit(AST.BoolConst e, Env env);
+		public T visit(AST.UnitExp e, Env env);
+		public T visit(AST.NumExp e, Env env);
+		public T visit(AST.StrExp e, Env env);
+		public T visit(AST.BoolExp e, Env env);
 		public T visit(AST.DivExp e, Env env);
 		public T visit(AST.ErrorExp e, Env env);
 		public T visit(AST.MultExp e, Env env);
