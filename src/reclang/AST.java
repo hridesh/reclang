@@ -13,7 +13,6 @@ import reclang.Env;
  * @author hridesh
  * 
  */
-@SuppressWarnings("rawtypes")
 public interface AST {
 	public static abstract class ASTNode implements AST {
 		public abstract <T> T accept(Visitor<T> visitor, Env env);
