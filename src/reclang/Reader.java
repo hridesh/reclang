@@ -9,6 +9,7 @@ import java.io.FileReader;
 import reclang.parser.*;
 import reclang.AST.*;
 
+@SuppressWarnings("deprecation")
 public class Reader {
 	Program read() throws IOException {
 		String programText = readNextProgram();
